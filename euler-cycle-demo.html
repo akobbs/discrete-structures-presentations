@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ейлерів цикл — Візуалізація алгоритму</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f4f8;
+      color: #1a1a2e;
+      line-height: 1.6;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #1565c0;
+      margin-bottom: 8px;
+      font-size: 1.8rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #546e7a;
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* Theory Section */
+    .theory {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .theory h2 {
+      color: #1565c0;
+      margin-bottom: 12px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .theory h2 .toggle-icon {
+      transition: transform 0.3s;
+      font-size: 0.8rem;
+    }
+
+    .theory h2 .toggle-icon.collapsed {
+      transform: rotate(-90deg);
+    }
+
+    .theory-content {
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+
+    .theory-content.collapsed {
+      max-height: 0 !important;
+    }
+
+    .definition {
+      background: #e3f2fd;
+      border-left: 4px solid #1565c0;
+      padding: 12px 16px;
+      margin: 10px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .definition strong {
+      color: #0d47a1;
+    }
+
+    .condition {
+      background: #e8f5e9;
+      border-left: 4px solid #388e3c;
+      padding: 12px 16px;
+      margin: 10px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .condition strong {
+      color: #1b5e20;
+    }
+
+    .algorithm-steps {
+      background: #fff3e0;
+      border-left: 4px solid #e65100;
+      padding: 12px 16px;
+      margin: 10px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .algorithm-steps ol {
+      padding-left: 20px;
+    }
+
+    .algorithm-steps li {
+      margin: 6px 0;
+    }
+
+    /* Main Layout */
+    .main-layout {
+      display: flex;
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .main-layout {
+        flex-direction: column;
+      }
+    }
+
+    /* Canvas Section */
+    .canvas-section {
+      flex: 1;
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .canvas-section h3 {
+      color: #1565c0;
+      margin-bottom: 12px;
+    }
+
+    canvas {
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+
+    .degree-info {
+      margin-top: 12px;
+      font-size: 0.85rem;
+      color: #546e7a;
+      text-align: center;
+    }
+
+    .degree-info span {
+      display: inline-block;
+      background: #e3f2fd;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin: 2px;
+    }
+
+    /* Controls Section */
+    .controls-section {
+      width: 340px;
+      min-width: 300px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .card h3 {
+      color: #1565c0;
+      margin-bottom: 12px;
+      font-size: 1rem;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: #1565c0;
+      color: #fff;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #0d47a1;
+    }
+
+    .btn-success {
+      background: #388e3c;
+      color: #fff;
+    }
+
+    .btn-success:hover:not(:disabled) {
+      background: #2e7d32;
+    }
+
+    .btn-warning {
+      background: #e65100;
+      color: #fff;
+    }
+
+    .btn-warning:hover:not(:disabled) {
+      background: #bf360c;
+    }
+
+    .btn-danger {
+      background: #c62828;
+      color: #fff;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background: #b71c1c;
+    }
+
+    .speed-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: #546e7a;
+    }
+
+    .speed-control input[type="range"] {
+      flex: 1;
+    }
+
+    /* Status */
+    .status {
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: #f5f5f5;
+      font-size: 0.9rem;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+    }
+
+    .status.active {
+      background: #e8f5e9;
+      color: #1b5e20;
+    }
+
+    .status.complete {
+      background: #e3f2fd;
+      color: #0d47a1;
+    }
+
+    /* Path display */
+    .path-display {
+      font-family: 'Courier New', monospace;
+      font-size: 0.95rem;
+      padding: 10px 14px;
+      background: #263238;
+      color: #4fc3f7;
+      border-radius: 8px;
+      min-height: 40px;
+      word-break: break-all;
+    }
+
+    .path-display .current {
+      color: #69f0ae;
+      font-weight: bold;
+    }
+
+    /* Log */
+    .log {
+      max-height: 220px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      background: #263238;
+      color: #b0bec5;
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .log-entry {
+      padding: 2px 0;
+      border-bottom: 1px solid #37474f;
+    }
+
+    .log-entry:last-child {
+      border-bottom: none;
+    }
+
+    .log-entry .step-num {
+      color: #ffb74d;
+      font-weight: bold;
+    }
+
+    .log-entry .action {
+      color: #81d4fa;
+    }
+
+    .log-entry .highlight {
+      color: #69f0ae;
+      font-weight: bold;
+    }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+      font-size: 0.8rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .legend-color {
+      width: 20px;
+      height: 4px;
+      border-radius: 2px;
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Ейлерів цикл на графі</h1>
+    <p class="subtitle">Лабораторна робота №3 — Візуалізація алгоритму пошуку Ейлерового циклу</p>
+
+    <!-- Theory -->
+    <div class="theory">
+      <h2 id="theory-toggle">
+        <span class="toggle-icon">&#9660;</span>
+        Теоретичні відомості
+      </h2>
+      <div class="theory-content" id="theory-content">
+        <div class="definition">
+          <strong>Ейлерів шлях (маршрут)</strong> — це шлях у графі, що проходить через кожне ребро графа рівно один раз.
+        </div>
+        <div class="definition">
+          <strong>Ейлерів цикл</strong> — це Ейлерів шлях, що починається і закінчується в одній і тій самій вершині.
+        </div>
+        <div class="definition">
+          <strong>Ейлерів граф</strong> — зв'язний граф, у якому існує Ейлерів цикл.
+        </div>
+
+        <div class="condition">
+          <strong>Умова існування:</strong>
+          <ul style="padding-left: 20px; margin-top: 6px;">
+            <li><strong>Ейлерів цикл</strong> існує тоді і тільки тоді, коли граф зв'язний і <em>всі</em> вершини мають <em>парну</em> степінь.</li>
+            <li><strong>Ейлерів шлях</strong> (не цикл) існує тоді і тільки тоді, коли граф зв'язний і рівно <em>дві</em> вершини мають <em>непарну</em> степінь (вони будуть початком і кінцем шляху).</li>
+          </ul>
+        </div>
+
+        <div class="algorithm-steps">
+          <strong>Алгоритм пошуку (DFS з видаленням ребер):</strong>
+          <ol>
+            <li>Обчислити степінь кожної вершини. Перевірити наявність Ейлерового шляху.</li>
+            <li>Обрати стартову вершину, вважати її поточною.</li>
+            <li>Якщо є суміжні вершини — рухатись далі (пошук в глибину), видаляючи пройдені ребра.</li>
+            <li>Якщо суміжних вершин немає — запам'ятати вершину як частину Ейлерового шляху і повернутись до попередньої.</li>
+            <li>Процес завершується, коли всі ребра видалено. Зафіксована послідовність і є Ейлеровим циклом.</li>
+          </ol>
+        </div>
+
+        <div class="definition" style="background: #fce4ec; border-color: #c62828;">
+          <strong style="color: #b71c1c;">Алгоритм Флері</strong> — альтернативний підхід: на кожному кроці обирається ребро, яке <em>не є мостом</em> (якщо є такий вибір). Міст — ребро, видалення якого робить граф незв'язним.
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+      <!-- Canvas -->
+      <div class="canvas-section">
+        <h3>Граф</h3>
+        <canvas id="graphCanvas" width="520" height="440"></canvas>
+        <div class="degree-info" id="degreeInfo"></div>
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background: #90a4ae;"></div>
+            <span>Звичайна вершина</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background: #388e3c;"></div>
+            <span>Поточна вершина</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background: #7b1fa2;"></div>
+            <span>У стеку</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #b0bec5;"></div>
+            <span>Ребро</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #c62828;"></div>
+            <span>Пройдене ребро</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls-section">
+        <div class="card">
+          <h3>Управління</h3>
+          <div class="buttons">
+            <button class="btn-success" id="btnStart">Старт</button>
+            <button class="btn-primary" id="btnBack" disabled>Назад</button>
+            <button class="btn-primary" id="btnStep" disabled>Наступний крок</button>
+            <button class="btn-warning" id="btnAuto" disabled>Авто</button>
+            <button class="btn-danger" id="btnReset">Скинути</button>
+          </div>
+          <div class="speed-control">
+            <span>Швидкість:</span>
+            <input type="range" id="speedRange" min="1" max="10" value="5">
+            <span id="speedLabel">5</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Статус</h3>
+          <div class="status" id="status">Натисніть "Старт" для початку алгоритму</div>
+        </div>
+
+        <div class="card">
+          <h3>Ейлерів цикл</h3>
+          <div class="path-display" id="pathDisplay">—</div>
+        </div>
+
+        <div class="card">
+          <h3>Журнал кроків</h3>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== GRAPH DATA ====================
+    const VERTICES = [1, 2, 3, 4, 5, 6, 7];
+    const EDGES = [
+      [1, 2], [2, 3], [3, 1], [1, 4], [4, 2],
+      [2, 7], [7, 6], [6, 4], [4, 3], [3, 5], [5, 1]
+    ];
+
+    // Vertex positions on canvas (hand-tuned for clarity)
+    const POS = {
+      1: { x: 100, y: 220 },
+      2: { x: 260, y: 60 },
+      3: { x: 260, y: 380 },
+      4: { x: 420, y: 220 },
+      5: { x: 100, y: 400 },
+      6: { x: 480, y: 100 },
+      7: { x: 480, y: 340 },
+    };
+
+    const VERTEX_RADIUS = 24;
+
+    // ==================== STATE ====================
+    let adjacency = {};      // adjacency list with edge tracking
+    let edgeStates = [];      // 'default' | 'traversed'
+    let vertexStates = {};    // 'default' | 'current' | 'stack' | 'done'
+    let stack = [];
+    let circuit = [];
+    let stepCount = 0;
+    let isRunning = false;
+    let isAutoPlaying = false;
+    let autoTimer = null;
+    let algorithmDone = false;
+    let history = [];         // snapshots for undo
+
+    // ==================== DOM ====================
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+    const statusEl = document.getElementById('status');
+    const pathEl = document.getElementById('pathDisplay');
+    const logEl = document.getElementById('log');
+    const degreeEl = document.getElementById('degreeInfo');
+    const btnStart = document.getElementById('btnStart');
+    const btnBack = document.getElementById('btnBack');
+    const btnStep = document.getElementById('btnStep');
+    const btnAuto = document.getElementById('btnAuto');
+    const btnReset = document.getElementById('btnReset');
+    const speedRange = document.getElementById('speedRange');
+    const speedLabel = document.getElementById('speedLabel');
+
+    // Theory toggle
+    const theoryToggle = document.getElementById('theory-toggle');
+    const theoryContent = document.getElementById('theory-content');
+    const toggleIcon = theoryToggle.querySelector('.toggle-icon');
+
+    theoryToggle.addEventListener('click', () => {
+      theoryContent.classList.toggle('collapsed');
+      toggleIcon.classList.toggle('collapsed');
+    });
+
+    // ==================== INIT ====================
+    function initState() {
+      adjacency = {};
+      for (const v of VERTICES) {
+        adjacency[v] = [];
+        vertexStates[v] = 'default';
+      }
+
+      edgeStates = EDGES.map(() => 'default');
+
+      for (let i = 0; i < EDGES.length; i++) {
+        const [u, v] = EDGES[i];
+        adjacency[u].push({ to: v, edgeIndex: i });
+        adjacency[v].push({ to: u, edgeIndex: i });
+      }
+
+      stack = [];
+      circuit = [];
+      stepCount = 0;
+      isRunning = false;
+      isAutoPlaying = false;
+      algorithmDone = false;
+      if (autoTimer) clearInterval(autoTimer);
+      autoTimer = null;
+
+      history = [];
+
+      btnStart.disabled = false;
+      btnBack.disabled = true;
+      btnStep.disabled = true;
+      btnAuto.disabled = true;
+      btnAuto.textContent = 'Авто';
+
+      statusEl.textContent = 'Натисніть "Старт" для початку алгоритму';
+      statusEl.className = 'status';
+      pathEl.innerHTML = '—';
+      logEl.innerHTML = '';
+
+      showDegrees();
+      draw();
+    }
+
+    function showDegrees() {
+      const degrees = {};
+      for (const v of VERTICES) degrees[v] = 0;
+      for (const [u, v] of EDGES) {
+        degrees[u]++;
+        degrees[v]++;
+      }
+      let html = 'Степені вершин: ';
+      for (const v of VERTICES) {
+        html += `<span>V${v} = ${degrees[v]}</span> `;
+      }
+      const allEven = VERTICES.every(v => degrees[v] % 2 === 0);
+      html += allEven
+        ? '<br>Усі степені парні — <strong style="color:#388e3c">Ейлерів цикл існує</strong>'
+        : '<br><strong style="color:#c62828">Ейлерів цикл не існує</strong>';
+      degreeEl.innerHTML = html;
+    }
+
+    // ==================== DRAWING ====================
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawEdges();
+      drawVertices();
+    }
+
+    function drawEdges() {
+      for (let i = 0; i < EDGES.length; i++) {
+        const [u, v] = EDGES[i];
+        const state = edgeStates[i];
+        const pU = POS[u];
+        const pV = POS[v];
+
+        ctx.beginPath();
+        ctx.moveTo(pU.x, pU.y);
+        ctx.lineTo(pV.x, pV.y);
+
+        if (state === 'traversed') {
+          ctx.strokeStyle = '#c62828';
+          ctx.lineWidth = 3;
+          ctx.setLineDash([8, 6]);
+        } else {
+          ctx.strokeStyle = '#b0bec5';
+          ctx.lineWidth = 2.5;
+          ctx.setLineDash([]);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+
+    function drawVertices() {
+      for (const v of VERTICES) {
+        const p = POS[v];
+        const state = vertexStates[v];
+
+        // Shadow
+        ctx.beginPath();
+        ctx.arc(p.x, p.y + 2, VERTEX_RADIUS, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0,0,0,0.1)';
+        ctx.fill();
+
+        // Circle
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, VERTEX_RADIUS, 0, Math.PI * 2);
+
+        if (state === 'current') {
+          ctx.fillStyle = '#388e3c';
+          ctx.strokeStyle = '#1b5e20';
+          ctx.lineWidth = 3;
+        } else if (state === 'stack') {
+          ctx.fillStyle = '#7b1fa2';
+          ctx.strokeStyle = '#4a148c';
+          ctx.lineWidth = 2;
+        } else {
+          ctx.fillStyle = '#546e7a';
+          ctx.strokeStyle = '#37474f';
+          ctx.lineWidth = 2;
+        }
+
+        ctx.fill();
+        ctx.stroke();
+
+        // Label
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 16px Segoe UI, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(v, p.x, p.y);
+      }
+    }
+
+    // ==================== HISTORY (UNDO) ====================
+    function saveSnapshot() {
+      history.push({
+        edgeStates: [...edgeStates],
+        vertexStates: Object.assign({}, vertexStates),
+        stack: [...stack],
+        circuit: [...circuit],
+        stepCount,
+        logCount: logEl.children.length,
+      });
+      btnBack.disabled = false;
+    }
+
+    function stepBack() {
+      if (history.length === 0) return;
+
+      if (algorithmDone) {
+        algorithmDone = false;
+        isRunning = true;
+        btnStep.disabled = false;
+        btnAuto.disabled = false;
+      }
+
+      const snap = history.pop();
+      edgeStates = snap.edgeStates;
+      vertexStates = snap.vertexStates;
+      stack = snap.stack;
+      circuit = snap.circuit;
+      stepCount = snap.stepCount;
+
+      // Remove log entries added after this snapshot
+      while (logEl.children.length > snap.logCount) {
+        logEl.removeChild(logEl.lastChild);
+      }
+
+      btnBack.disabled = history.length === 0;
+
+      if (stack.length > 0) {
+        const cur = stack[stack.length - 1];
+        setStatus(`Поточна вершина: ${cur}. Стек: [${stack.join(', ')}]`);
+      }
+
+      updatePathDisplay();
+      draw();
+    }
+
+    // ==================== ALGORITHM ====================
+    function getAvailableEdges(vertex) {
+      return adjacency[vertex].filter(e => edgeStates[e.edgeIndex] === 'default');
+    }
+
+    function startAlgorithm() {
+      isRunning = true;
+      btnStart.disabled = true;
+      btnStep.disabled = false;
+      btnAuto.disabled = false;
+
+      const startVertex = 1;
+      stack = [startVertex];
+      circuit = [];
+
+      for (const v of VERTICES) vertexStates[v] = 'default';
+      vertexStates[startVertex] = 'current';
+
+      stepCount = 0;
+      addLog('Старт', `Обираємо початкову вершину: ${startVertex}. Додаємо до стеку.`);
+      setStatus(`Поточна вершина: ${startVertex}. Стек: [${stack.join(', ')}]`);
+      draw();
+    }
+
+    function step() {
+      if (algorithmDone) return;
+
+      saveSnapshot();
+
+      if (stack.length === 0) {
+        finishAlgorithm();
+        return;
+      }
+
+      stepCount++;
+      const current = stack[stack.length - 1];
+      const available = getAvailableEdges(current);
+
+      if (available.length > 0) {
+        // Move to next vertex via an available edge
+        const edge = available[0];
+        const next = edge.to;
+
+        edgeStates[edge.edgeIndex] = 'traversed';
+
+        // Update vertex states
+        for (const v of VERTICES) vertexStates[v] = 'default';
+        vertexStates[current] = 'stack';
+
+        stack.push(next);
+        vertexStates[next] = 'current';
+
+        // Mark all vertices in stack
+        for (let i = 0; i < stack.length - 1; i++) {
+          if (vertexStates[stack[i]] !== 'current') {
+            vertexStates[stack[i]] = 'stack';
+          }
+        }
+
+        addLog(`Крок ${stepCount}`, `Йдемо з ${current} до ${next} (ребро видалено). Стек: [${stack.join(', ')}]`);
+        setStatus(`Поточна вершина: ${next}. Рухаємось по ребру (${current}, ${next}).`);
+      } else {
+        // No available edges — backtrack, add to circuit
+        const removed = stack.pop();
+        circuit.push(removed);
+
+        // Update vertex states
+        for (const v of VERTICES) vertexStates[v] = 'default';
+        if (stack.length > 0) {
+          vertexStates[stack[stack.length - 1]] = 'current';
+          for (let i = 0; i < stack.length - 1; i++) {
+            vertexStates[stack[i]] = 'stack';
+          }
+        }
+
+        addLog(`Крок ${stepCount}`, `Вершина ${removed} не має вільних ребер — додаємо до циклу. Цикл: [${circuit.join(', ')}]`);
+
+        if (stack.length > 0) {
+          setStatus(`Повертаємось до вершини ${stack[stack.length - 1]}. Вершину ${removed} додано до циклу.`);
+        } else {
+          setStatus(`Стек порожній. Алгоритм завершується.`);
+        }
+      }
+
+      updatePathDisplay();
+      draw();
+
+      if (stack.length === 0) {
+        finishAlgorithm();
+      }
+    }
+
+    function finishAlgorithm() {
+      algorithmDone = true;
+      isRunning = false;
+      stopAutoPlay();
+
+      btnStep.disabled = true;
+      btnAuto.disabled = true;
+
+      for (const v of VERTICES) vertexStates[v] = 'default';
+
+      addLog('Готово', `Ейлерів цикл знайдено! ${circuit.join(' → ')}`);
+      setStatus(`Алгоритм завершено! Ейлерів цикл знайдено.`, 'complete');
+
+      updatePathDisplay();
+      draw();
+    }
+
+    // ==================== UI HELPERS ====================
+    function setStatus(text, type) {
+      statusEl.textContent = text;
+      statusEl.className = 'status';
+      if (type === 'complete') statusEl.classList.add('complete');
+      else if (isRunning) statusEl.classList.add('active');
+    }
+
+    function addLog(label, text) {
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerHTML = `<span class="step-num">[${label}]</span> <span class="action">${text}</span>`;
+      logEl.appendChild(entry);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function updatePathDisplay() {
+      if (circuit.length === 0) {
+        pathEl.innerHTML = 'Стек: [' + stack.join(', ') + ']';
+        return;
+      }
+      let html = '';
+      if (algorithmDone) {
+        html = '<span class="current">' + circuit.join(' → ') + '</span>';
+      } else {
+        html = circuit.join(' → ');
+        if (stack.length > 0) {
+          html += ' | Стек: [' + stack.join(', ') + ']';
+        }
+      }
+      pathEl.innerHTML = html;
+    }
+
+    // ==================== AUTO PLAY ====================
+    function toggleAutoPlay() {
+      if (isAutoPlaying) {
+        stopAutoPlay();
+      } else {
+        startAutoPlay();
+      }
+    }
+
+    function startAutoPlay() {
+      if (algorithmDone) return;
+      isAutoPlaying = true;
+      btnAuto.textContent = 'Стоп';
+      btnStep.disabled = true;
+
+      const speed = parseInt(speedRange.value);
+      const interval = 1500 - (speed - 1) * 130; // 1500ms to 330ms
+
+      autoTimer = setInterval(() => {
+        step();
+        if (algorithmDone) {
+          stopAutoPlay();
+        }
+      }, interval);
+    }
+
+    function stopAutoPlay() {
+      isAutoPlaying = false;
+      if (autoTimer) clearInterval(autoTimer);
+      autoTimer = null;
+      btnAuto.textContent = 'Авто';
+      if (isRunning && !algorithmDone) {
+        btnStep.disabled = false;
+      }
+    }
+
+    // ==================== EVENTS ====================
+    btnStart.addEventListener('click', startAlgorithm);
+    btnBack.addEventListener('click', stepBack);
+    btnStep.addEventListener('click', step);
+    btnAuto.addEventListener('click', toggleAutoPlay);
+    btnReset.addEventListener('click', initState);
+    speedRange.addEventListener('input', () => {
+      speedLabel.textContent = speedRange.value;
+      if (isAutoPlaying) {
+        stopAutoPlay();
+        startAutoPlay();
+      }
+    });
+
+    // ==================== INIT ====================
+    initState();
+  </script>
+</body>
+</html>
